@@ -1,0 +1,69 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  # Hermes revision the integration job is verified against (bump deliberately).
+  HERMES_REF: cacad9510e16ff0dc726ebf97d192033ed218b4c
+
+jobs:
+  pure-core:
+    name: pure core (Python ${{ matrix.python }}, no Hermes)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install (release-age quarantine: nothing newer than 3 days)
+        run: |
+          export UV_EXCLUDE_NEWER="$(date -u -d '3 days ago' +%Y-%m-%dT%H:%M:%SZ)"
+          uv venv --python ${{ matrix.python }}
+          uv pip install "aiohttp>=3.9,<4" httpx pytest pytest-asyncio hypothesis ruff
+      - run: .venv/bin/ruff check .
+      - name: Tests (Hermes-dependent modules skip themselves)
+        run: .venv/bin/python -I -m pytest -q
+
+  hermes:
+    name: against Hermes (Python 3.14)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: plugin
+      - uses: actions/checkout@v4
+        with:
+          repository: NousResearch/hermes-agent
+          ref: ${{ env.HERMES_REF }}
+          path: hermes-agent
+      - uses: astral-sh/setup-uv@v5
+      - name: Install Hermes and the plugin's test dependencies
+        run: |
+          export UV_EXCLUDE_NEWER="$(date -u -d '3 days ago' +%Y-%m-%dT%H:%M:%SZ)"
+          uv venv --python 3.14 hermes-venv
+          uv pip install --python hermes-venv/bin/python -e ./hermes-agent
+          uv pip install --python hermes-venv/bin/python "aiohttp>=3.9,<4" pytest pytest-asyncio hypothesis ruff
+      - name: Lint
+        working-directory: plugin
+        run: ../hermes-venv/bin/ruff check .
+      - name: Full test suite (unit, integration, chaos, security)
+        working-directory: plugin
+        run: ../hermes-venv/bin/python -I -m pytest -q --durations=5 2>&1 | tee ../test-output.txt
+      - name: Catalog gate
+        run: |
+          source hermes-venv/bin/activate
+          hermes plugins validate "$GITHUB_WORKSPACE/plugin" --install-deps
+          hermes plugins doctor "$GITHUB_WORKSPACE/plugin" --ci
+      - name: No secrets in test output
+        run: |
+          if grep -E "s3cret_A{30}|k{20}" test-output.txt; then echo "secret leaked into test output"; exit 1; fi
+      - name: Mutation sanity check (each removed control must fail the suite)
+        working-directory: plugin
+        run: ../hermes-venv/bin/python tools/mutation_check.py
