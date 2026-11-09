@@ -1,0 +1,22 @@
+[project]
+name = "hermes-ussd"
+version = "0.1.0"
+description = "Talk to Hermes from any phone: USSD in, SMS out, via Africa's Talking"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = ["aiohttp>=3.9,<4"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-q -p no:cacheprovider"
+pythonpath = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = ["tests", "tools"]
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "S", "ASYNC"]
+ignore = ["S101", "S311", "B904", "E501"]
