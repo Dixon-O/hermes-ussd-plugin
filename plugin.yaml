@@ -1,0 +1,101 @@
+name: hermes-ussd
+label: "USSD & SMS (Africa's Talking)"
+kind: platform
+version: 0.1.0
+description: >
+  Use Hermes from any phone, including feature phones with no internet. Dial a USSD code for an
+  instant menu, ask a question, and the agent's answer arrives by SMS. Runs on Africa's Talking
+  (Kenya, Uganda, Tanzania, Nigeria, Rwanda, Malawi and more). Closed by default: only allowlisted
+  numbers can start an agent turn. Store-first outbox, at-most-once SMS, daily SMS cap.
+author: Dixon James Osure
+requires_hermes: ">=0.22.5"
+python_dependencies:
+  - "aiohttp>=3.9,<4"
+requires_env:
+  - name: AT_USERNAME
+    description: "Africa's Talking username (use 'sandbox' for the sandbox app)"
+    prompt: "Africa's Talking username"
+    url: "https://account.africastalking.com/apps/sandbox/settings/key"
+    password: false
+  - name: AT_API_KEY
+    description: "Africa's Talking API key for that app"
+    prompt: "Africa's Talking API key"
+    url: "https://account.africastalking.com/apps/sandbox/settings/key"
+    password: true
+  - name: AT_WEBHOOK_SECRET
+    description: "Secret path segment for the callback URLs (24-128 chars of A-Z a-z 0-9 _ -). Run `hermes ussd setup` to generate one."
+    prompt: "Webhook secret (blank = generate with `hermes ussd setup`)"
+    password: true
+optional_env:
+  - name: AT_ENV
+    description: "sandbox (default) or production"
+    prompt: "Environment (sandbox/production)"
+    password: false
+  - name: AT_ALLOWED_USERS
+    description: "Comma-separated phone numbers allowed to use the agent (E.164 or local format). Empty = nobody."
+    prompt: "Allowed phone numbers (comma-separated)"
+    password: false
+  - name: AT_ALLOW_ALL_USERS
+    description: "Let any phone start an agent turn on your Africa's Talking balance (dev only)"
+    prompt: "Allow all numbers? (true/false)"
+    password: false
+  - name: AT_USSD_CODE
+    description: "The USSD service code you registered, for display in setup and doctor (e.g. *384*1234#)"
+    prompt: "USSD service code"
+    password: false
+  - name: AT_SMS_SENDER
+    description: "Registered SMS sender ID or shortcode (blank uses the Africa's Talking default)"
+    prompt: "SMS sender ID"
+    password: false
+  - name: AT_HOME_CHANNEL
+    description: "Phone number for cron / notification delivery"
+    prompt: "Home number (or empty)"
+    password: false
+  - name: AT_WEBHOOK_HOST
+    description: "Bind address for the callback listener (default 127.0.0.1; put a TLS tunnel or reverse proxy in front)"
+    prompt: "Listener host"
+    password: false
+  - name: AT_WEBHOOK_PORT
+    description: "Listener port (default 8790)"
+    prompt: "Listener port"
+    password: false
+  - name: AT_DEFAULT_COUNTRY_CODE
+    description: "Country calling code for numbers written without +, digits only (default 254)"
+    prompt: "Default country code"
+    password: false
+  - name: AT_LANGUAGE
+    description: "Default menu language: en or sw"
+    prompt: "Default language"
+    password: false
+  - name: AT_TOOLSETS
+    description: "Comma-separated Hermes toolsets exposed to phone users (default: safe)"
+    prompt: "Toolsets for phone users"
+    password: false
+  - name: AT_ALLOW_COMMANDS
+    description: "Allow gateway slash-commands from inbound SMS (default false; never from USSD)"
+    prompt: "Allow slash-commands over SMS? (true/false)"
+    password: false
+  - name: AT_DAILY_SMS_CAP
+    description: "Maximum SMS sent per day (default 200; 0 disables sending)"
+    prompt: "Daily SMS cap"
+    password: false
+  - name: AT_SMS_MAX_SEGMENTS
+    description: "Maximum SMS segments per answer (default 3)"
+    prompt: "Max SMS segments per answer"
+    password: false
+  - name: AT_ASKS_PER_HOUR
+    description: "Per-number questions per hour (default 10)"
+    prompt: "Asks per number per hour"
+    password: false
+  - name: AT_HOPS_PER_MINUTE
+    description: "Per-number USSD hops per minute (default 30)"
+    prompt: "USSD hops per minute"
+    password: false
+  - name: AT_RETENTION_DAYS
+    description: "Days to keep message text before purging (default 7; opt-outs are kept)"
+    prompt: "Retention days"
+    password: false
+  - name: AT_DAY_OFFSET_HOURS
+    description: "UTC offset (hours) that defines the daily-cap day (default 3, East Africa Time)"
+    prompt: "Day offset from UTC (hours)"
+    password: false
