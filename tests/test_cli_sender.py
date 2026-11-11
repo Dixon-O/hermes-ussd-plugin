@@ -9,10 +9,15 @@ import sqlite3
 import httpx
 import pytest
 
-from hermes_ussd import adapter, cli
+from hermes_ussd import cli
 from hermes_ussd.settings import load_settings
 from hermes_ussd.sms.client import ATClient, Outcome
 from hermes_ussd.store import Store
+
+try:  # the adapter needs Hermes's gateway package; tests that use it skip without it
+    from hermes_ussd import adapter
+except ImportError:
+    adapter = None
 
 from conftest import SECRET
 from fake_at import FakeAT
