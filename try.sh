@@ -7,7 +7,7 @@ set -u
 
 PORT="${TRY_PORT:-8790}"
 NUMBER="+254700000001"
-REPO="${TRY_REPO:-Dixon-O/hermes-ussd}"
+REPO="${TRY_REPO:-Dixon-O/hermes-ussd-plugin}"
 LOG="$(mktemp -t hermes-ussd-try.XXXXXX)"
 GATEWAY_PID=""
 

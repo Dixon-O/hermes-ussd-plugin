@@ -14,8 +14,8 @@ hermes model        # pick any model, paste its key
 **Then, one command:**
 
 ```bash
-git clone https://github.com/Dixon-O/hermes-ussd
-cd hermes-ussd
+git clone https://github.com/Dixon-O/hermes-ussd-plugin
+cd hermes-ussd-plugin
 bash try.sh
 ```
 

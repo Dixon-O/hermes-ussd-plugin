@@ -14,8 +14,8 @@ Everything Claude could verify without an Africa's Talking account is verified (
 ## 1. Install and configure (5 min)
 
 ```bash
-git clone https://github.com/<OWNER>/hermes-ussd && cd hermes-ussd
-hermes plugins install <OWNER>/hermes-ussd        # or copy the folder into $HERMES_HOME/plugins/hermes-ussd
+git clone https://github.com/Dixon-O/hermes-ussd-plugin && cd hermes-ussd-plugin
+hermes plugins install Dixon-O/hermes-ussd-plugin        # or copy the folder into $HERMES_HOME/plugins/hermes-ussd
 hermes plugins enable hermes-ussd
 hermes ussd setup --username sandbox --api-key <KEY> --public-url https://<your-tunnel-host> \
     --allow <your number, e.g. +254700000001> --ussd-code '*384*1234#'
@@ -75,9 +75,9 @@ Notes:
 
 ## 4. Submission (Wednesday)
 
-1. Create the **public** repo `<OWNER>/hermes-ussd`, push this folder (MIT licence is included), turn on **private vulnerability reporting** (Settings, Code security).
+1. Create the **public** repo `Dixon-O/hermes-ussd-plugin`, push this folder (MIT licence is included), turn on **private vulnerability reporting** (Settings, Code security).
 2. Wait for CI to go green. Fix anything red (send Claude the log). The `hermes` job runs `validate --install-deps` and `doctor --ci`.
-3. Take the 40-character SHA of the green commit. Put it in `submission/hermes-ussd.yaml` with your GitHub handle for `<OWNER>`. **Do not change code after pinning without re-pinning**; the SHA is the trust model.
+3. Take the 40-character SHA of the green commit. Put it in `submission/hermes-ussd.yaml` (the repo URL and maintainer are already filled in). **Do not change code after pinning without re-pinning**; the SHA is the trust model.
 4. Fork `NousResearch/hermes-agent`, add `plugin-catalog/hermes-ussd.yaml` (re-read `plugin-catalog/README.md` first in case the schema moved), open the PR using `submission/PR_DESCRIPTION.md`; fill in the `<LINK>`, `<N>`, `<DATE>` placeholders.
 5. Upload the demo (<90 s) where the form accepts it, submit the Typeform with the PR link.
 6. Post the demo on X tagging @NousResearch; join the Discord thread Nous opens for each entry.

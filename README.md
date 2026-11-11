@@ -15,12 +15,12 @@ USSD cannot wait for a language model: the operator drops the session after abou
 
 ## Try it in two minutes
 
-**Easiest path (a pretend phone in your terminal, nothing to configure): [TRY_IT.md](TRY_IT.md).** Three lines: `git clone https://github.com/Dixon-O/hermes-ussd`, `cd hermes-ussd`, `bash try.sh`.
+**Easiest path (a pretend phone in your terminal, nothing to configure): [TRY_IT.md](TRY_IT.md).** Three lines: `git clone https://github.com/Dixon-O/hermes-ussd-plugin`, `cd hermes-ussd`, `bash try.sh`.
 
 ## Manual version (no Africa's Talking account needed for the USSD half)
 
 ```bash
-hermes plugins install Dixon-O/hermes-ussd          # or: hermes plugins install hermes-ussd  (once listed)
+hermes plugins install Dixon-O/hermes-ussd-plugin          # or: hermes plugins install hermes-ussd  (once listed)
 hermes plugins enable hermes-ussd
 
 # Placeholder credentials are enough to exercise the menu, the agent and USSD read-back.
