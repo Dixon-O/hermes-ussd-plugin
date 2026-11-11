@@ -128,8 +128,8 @@ What is verified, and what is not, as of this commit:
 | Chaos: 1,000 turns with 20% provider failures | Every reply delivered once, none lost, none duplicated; also 10% duplicate callbacks, ambiguous network drops (never resent), total outage then recovery, balance exhaustion (paused, nothing dropped), hostile traffic |
 | `hermes plugins validate` and `hermes plugins doctor --ci` | Pass locally (`--install-deps` is run in CI) |
 | Mutation check (`tools/mutation_check.py`) | 8 of 8 removed controls caught by the tests |
-| Africa's Talking **sandbox**: real callback payloads, SMS responses, delivery reports, status-code table | **To be confirmed by running the sandbox E2E**; the plugin was written from the documentation. Treat the provider status-code mapping as unverified until then |
-| `requires_hermes` floor | `>=0.22.5` is a conservative floor chosen from current catalog practice; tested only on `main` @ `cacad951` |
+| Africa's Talking **sandbox** E2E (Nov 11 2026, Hermes v0.23.1 stable, Gemini model, tunnel to a laptop) | **Verified live:** USSD menu, ask, `END` acknowledgement, agent answer by SMS (1 to 3 segments, KES 0.80 per segment, message id and cost returned by the SMS API), read-back and paging on option 2, Status, language switch, allowlist refusal. **Sandbox quirk:** the simulator posts delivery reports as `Failed` / `DeliveryFailure` for messages it did display, so delivery status is not meaningful in the sandbox; it is recorded as reported. Production delivery-report behaviour is **not verified** |
+| `requires_hermes` floor | `>=0.22.5` is a conservative floor; tested on `main` @ `cacad951` (CI) and, by hand end to end, on stable v0.23.1 |
 | Kiswahili strings | First pass; needs review by a native speaker before production use |
 | Not supported | Shared-ingress / multiplexed profiles (one listener per account and port; a second gateway is refused), SMS approval codes, per-message delivery status on the USSD Status screen (delivery reports are recorded in the outbox; the screen shows counts), voice, media |
 
