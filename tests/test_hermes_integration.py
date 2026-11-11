@@ -351,3 +351,28 @@ async def test_gateway_setup_notices_never_become_sms(running):
     await asyncio.sleep(0.2)
     assert len(fake.sent) == 1 and "sethome" not in fake.sent[0][1]
     assert fake.sent[0][1].startswith("Ref ")  # the answer still carries the question's Ref
+
+
+def test_failure_copy_detection():
+    assert adapter_mod.is_notice("⚠️ No response from provider for 180s (model: x). Reconnecting...")
+    assert adapter_mod.is_failure_copy("Google AI Studio rejected the request and retrying won't help. Pick another model")
+    assert adapter_mod.is_failure_copy("Provider said: quota exceeded")
+    assert not adapter_mod.is_failure_copy("Yellow streaks on maize often mean maize streak virus.")
+
+
+async def test_provider_errors_become_one_generic_sms(running):
+    """Regression (found in the Africa's Talking sandbox): Hermes's failed-turn copy was texted to the user,
+    three segments of provider internals. Now: transient warnings vanish, the final failure is replaced by
+    one generic line carrying the Ref, and repeated error lines for the same ask send nothing."""
+    a, fake, http, seen = running
+    await http.post(f"/{SECRET}/ussd", data=hop("1*what is wrong with my maize"))
+    assert await wait_for(lambda: seen)
+    await a.send(A, "⚠️ No response from provider for 90s (model: m). Aborting call.")  # transient
+    await a.send(A, "Google AI Studio rejected the request and retrying won't help. Pick another model with /model.")
+    await a.send(A, "Provider said: Provider has been unresponsive for 5 consecutive stale attempts.")
+    assert await wait_for(lambda: fake.sent)
+    await asyncio.sleep(0.5)  # the test model also answers; only the error handling is under test
+    bodies = [b for _, b in fake.sent]
+    generic = [b for b in bodies if "try again" in b]
+    assert len(generic) == 1 and generic[0].startswith("Ref ")
+    assert not any(w in b for b in bodies for w in ("Provider", "rejected", "No response from provider"))

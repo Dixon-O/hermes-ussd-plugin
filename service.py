@@ -154,6 +154,8 @@ class Service:
         try:
             mid = _field(form, "id", 100)
             status = _field(form, "status", 40)
+            log.info("delivery report: status=%s reason=%s fields=%s", status or "-",
+                     _field(form, "failureReason", 40) or "-", ",".join(sorted(str(k) for k in form)[:12]))
             if mid and status:
                 self.store.apply_dlr(mid, status, _field(form, "failureReason", 120) or None)
         except Exception:  # noqa: BLE001

@@ -44,7 +44,7 @@ PLATFORM_HINT = (
 TRUNCATION_NOTE = "... (rest: dial the USSD code, choose 2)"
 # Gateway housekeeping (busy acks, drain notices, restart pings) all open with one of these
 # language-independent markers. They must never cost the user an SMS.
-_NOTICE_MARKERS = ("⚡", "⏳", "⏩", "↪", "♻", "\U0001f4be", "\U0001f4ec", "◐")
+_NOTICE_MARKERS = ("⚡", "⏳", "⏩", "↪", "♻", "\U0001f4be", "\U0001f4ec", "◐", "⚠", "❌")
 _NOTICE_MAX_LEN = 600
 
 
@@ -97,6 +97,19 @@ def is_notice(text: str) -> bool:
     """True for gateway housekeeping text that must not be sent as an SMS."""
     head = text.lstrip()[:1]
     return bool(head) and head in _NOTICE_MARKERS and len(text) <= _NOTICE_MAX_LEN
+
+
+# Hermes reports a failed model call as ordinary reply text. Texting that to a phone costs money and
+# shows the user provider internals, so it is replaced by one generic line (and sent once per ask).
+_FAILURE_STEMS = ("retrying won't help", "provider said:", "switch models or start a new session",
+                  "no response from provider", "pick another model with /model", "hermes/logs/agent.log")
+FAILURE_REPLY = "Sorry, I could not answer that just now. Please try again in a few minutes."
+
+
+def is_failure_copy(text: str) -> bool:
+    """True for Hermes's own failed-turn copy (provider errors, timeouts), which must not reach a phone."""
+    low = text.lower()
+    return len(text) <= 1500 and any(stem in low for stem in _FAILURE_STEMS)
 
 
 def open_store() -> st.Store:
@@ -270,8 +283,15 @@ class ATAdapter(BasePlatformAdapter):
         number = normalize_e164(chat_id, s.default_country_code)
         if number is None:
             return SendResult(success=False, error="invalid recipient number", error_kind="not_found")
-        plain = strip_markdown(text)
+        failure = is_failure_copy(text)
         claimed = store.claim_oldest_ask(number)
+        if failure:
+            if claimed is None:  # a second error line for an ask already answered: say nothing
+                return SendResult(success=True, message_id="suppressed-notice")
+            log.warning("agent turn failed for %s; sending a generic reply instead of the provider error",
+                        mask(number))
+            text = FAILURE_REPLY
+        plain = strip_markdown(text)
         ref, origin = claimed if claimed else (store.new_ref(), "system")
         prefix = f"Ref {ref}: " if origin == "ussd" else ""
         split = encoding.split_segments(prefix + plain, s.sms_max_segments, truncation_note=TRUNCATION_NOTE)
