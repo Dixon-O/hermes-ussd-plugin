@@ -1,4 +1,5 @@
-name: ci
+name: Verify (lint, unit, integration, chaos, security, catalog gate)
+run-name: "Verify ${{ github.ref_name }} @ ${{ github.sha }}: pure-core 3.11-3.13, Hermes 3.14 integration, mutation check"
 
 on:
   push:
@@ -22,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - name: Install (release-age quarantine: nothing newer than 3 days)
+      - name: "Install dependencies (release-age quarantine: nothing newer than 3 days)"
         run: |
           export UV_EXCLUDE_NEWER="$(date -u -d '3 days ago' +%Y-%m-%dT%H:%M:%SZ)"
           uv venv --python ${{ matrix.python }}
